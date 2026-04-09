@@ -1,2 +1,2 @@
-# Soci-t-IMS
+# Société IMS
 Formulaire IMS
