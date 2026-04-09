@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dépôt Dentaire — Demande Client</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<style>
+  :root {
+    --navy: #0D1B2A;
+    --steel: #1B3A5C;
+    --teal: #1A8C8C;
+    --teal-light: #22B2B2;
+    --cream: #F5F0E8;
+    --warm-white: #FDFAF6;
+    --text-dark: #0D1B2A;
+    --text-mid: #4A5568;
+    --text-light: #8A9BB0;
+    --border: #D8E3EE;
+    --success: #1A8C6A;
+    --error: #C0392B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    min-height: 100vh;
+    color: var(--text-dark);
+  }
+
+  /* ─── TABS ─── */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    background: var(--navy);
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 1.1rem 2rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.25s;
+  }
+  .tab-btn.active {
+    color: var(--teal-light);
+    border-bottom-color: var(--teal-light);
+  }
+  .tab-btn:hover:not(.active) { color: rgba(255,255,255,0.8); }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--navy);
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(26,140,140,0.3) 0%, transparent 70%);
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(26,140,140,0.2) 0%, transparent 70%);
+  }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(26,140,140,0.15);
+    border: 1px solid rgba(26,140,140,0.4);
+    border-radius: 100px;
+    padding: 0.4rem 1rem;
+    margin-bottom: 1.2rem;
+  }
+  .logo-badge svg { width: 16px; height: 16px; fill: var(--teal-light); }
+  .logo-badge span {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--teal-light);
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 0.6rem;
+    position: relative;
+  }
+  .header-sub {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.95rem;
+    font-weight: 300;
+    position: relative;
+  }
+
+  /* ─── MAIN LAYOUT ─── */
+  .page { display: none; padding: 2.5rem 1rem 4rem; max-width: 680px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* ─── FORM CARD ─── */
+  .form-card {
+    background: var(--warm-white);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 4px 32px rgba(13,27,42,0.08);
+  }
+
+  .section-header {
+    background: linear-gradient(135deg, var(--steel) 0%, var(--navy) 100%);
+    padding: 1.2rem 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .section-header .icon {
+    width: 36px; height: 36px;
+    background: rgba(26,140,140,0.25);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .section-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+  .section-header p {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.5);
+    margin-top: 0.1rem;
+  }
+
+  .form-body { padding: 1.8rem; }
+
+  .field-group { margin-bottom: 1.4rem; }
+  .field-group:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-mid);
+    margin-bottom: 0.5rem;
+  }
+  label span.req { color: var(--teal); margin-left: 2px; }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 0.9rem 1.1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    background: #fff;
+    transition: all 0.2s;
+    outline: none;
+    appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(26,140,140,0.12);
+  }
+  input::placeholder, textarea::placeholder { color: var(--text-light); }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A9BB0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+  }
+  textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 480px) { .row-2 { grid-template-columns: 1fr; } }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 1.8rem -1.8rem;
+  }
+
+  /* ─── TYPE BUTTONS ─── */
+  .type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+  .type-btn {
+    border: 1.5px solid var(--border);
+    background: #fff;
+    border-radius: 12px;
+    padding: 1rem 0.75rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .type-btn:hover { border-color: var(--teal); }
+  .type-btn.selected {
+    border-color: var(--teal);
+    background: rgba(26,140,140,0.06);
+  }
+  .type-btn.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 6px; right: 8px;
+    font-size: 0.7rem;
+    color: var(--teal);
+    font-weight: 700;
+  }
+  .type-btn .emoji { font-size: 1.5rem; display: block; margin-bottom: 0.4rem; }
+  .type-btn .label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    display: block;
+  }
+  .type-btn.selected .label { color: var(--teal); font-weight: 600; }
+  input[name="type_demande"] { display: none; }
+
+  /* ─── URGENCE ─── */
+  .urgence-row { display: flex; gap: 0.6rem; }
+  .urgence-btn {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    border-radius: 8px;
+    padding: 0.6rem 0.5rem;
+    cursor: pointer;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    transition: all 0.2s;
+  }
+  .urgence-btn.selected-low { border-color: #1A8C6A; background: rgba(26,140,106,0.08); color: #1A8C6A; }
+  .urgence-btn.selected-mid { border-color: #D48B20; background: rgba(212,139,32,0.08); color: #D4B520; }
+  .urgence-btn.selected-high { border-color: var(--error); background: rgba(192,57,43,0.08); color: var(--error); }
+
+  /* ─── SUBMIT ─── */
+  .submit-btn {
+    width: 100%;
+    margin-top: 1.8rem;
+    padding: 1.1rem 2rem;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-light) 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.25s;
+    box-shadow: 0 4px 20px rgba(26,140,140,0.35);
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(26,140,140,0.45); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* ─── SUCCESS ─── */
+  .success-card {
+    background: var(--warm-white);
+    border-radius: 20px;
+    border: 1px solid #C3E8D8;
+    padding: 3rem 2rem;
+    text-align: center;
+    box-shadow: 0 4px 32px rgba(13,27,42,0.08);
+    display: none;
+  }
+  .success-card.visible { display: block; }
+  .success-icon {
+    width: 70px; height: 70px;
+    background: linear-gradient(135deg, #1A8C6A, #22C490);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+  }
+  .success-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 0.6rem;
+  }
+  .success-card p { color: var(--text-mid); font-size: 0.95rem; line-height: 1.6; }
+  .reset-btn {
+    margin-top: 1.5rem;
+    padding: 0.7rem 1.8rem;
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: var(--teal); color: var(--teal); }
+
+  /* ─── ERROR MSG ─── */
+  .error-msg {
+    background: rgba(192,57,43,0.08);
+    border: 1px solid rgba(192,57,43,0.3);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    font-size: 0.85rem;
+    color: var(--error);
+    margin-top: 1rem;
+    display: none;
+  }
+  .error-msg.visible { display: block; }
+
+  /* ─── QR PAGE ─── */
+  .qr-card {
+    background: var(--warm-white);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    padding: 2rem;
+    box-shadow: 0 4px 32px rgba(13,27,42,0.08);
+    text-align: center;
+  }
+  .qr-card h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+  }
+  .qr-card .sub { color: var(--text-mid); font-size: 0.9rem; margin-bottom: 2rem; }
+
+  .url-input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+  .url-input-group input {
+    flex: 1;
+    font-size: 0.85rem;
+    padding: 0.8rem 1rem;
+  }
+  .url-input-group button {
+    padding: 0.8rem 1.2rem;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .url-input-group button:hover { background: var(--steel); }
+
+  #qr-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  #qr-container canvas, #qr-container img {
+    border-radius: 12px;
+    border: 8px solid #fff;
+    box-shadow: 0 4px 20px rgba(13,27,42,0.12);
+  }
+
+  .qr-tip {
+    background: rgba(26,140,140,0.08);
+    border: 1px solid rgba(26,140,140,0.2);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    font-size: 0.83rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+    text-align: left;
+    margin-bottom: 1.2rem;
+  }
+  .qr-tip strong { color: var(--teal); }
+
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2rem;
+    background: linear-gradient(135deg, var(--teal), var(--teal-light));
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(26,140,140,0.3);
+  }
+  .download-btn:hover { transform: translateY(-2px); }
+
+  /* ─── CONFIG PAGE ─── */
+  .config-card {
+    background: var(--warm-white);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 4px 32px rgba(13,27,42,0.08);
+    margin-bottom: 1.5rem;
+  }
+  .config-card .section-header { padding: 1rem 1.5rem; }
+  .config-body { padding: 1.5rem; }
+  .config-body .field-group { margin-bottom: 1rem; }
+  .save-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .save-btn:hover { background: var(--steel); }
+
+  .info-box {
+    background: rgba(26,140,140,0.08);
+    border: 1px solid rgba(26,140,140,0.25);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    font-size: 0.85rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+  }
+  .info-box a { color: var(--teal); text-decoration: none; font-weight: 500; }
+  .info-box strong { color: var(--navy); }
+
+  .step-list { list-style: none; }
+  .step-list li {
+    display: flex;
+    gap: 0.8rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .step-list li:last-child { border-bottom: none; }
+  .step-num {
+    width: 24px; height: 24px;
+    background: var(--teal);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-list li span { font-size: 0.85rem; color: var(--text-mid); line-height: 1.5; }
+  .step-list li span strong { color: var(--navy); }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .spinner.active { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .char-count { font-size: 0.75rem; color: var(--text-light); text-align: right; margin-top: 0.3rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-badge">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+    <span>Dépôt Dentaire</span>
+  </div>
+  <h1>Votre demande en ligne</h1>
+  <p class="header-sub">Commande · Assistance · Informations</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="showTab('form')">📋 Formulaire</button>
+  <button class="tab-btn" onclick="showTab('qr')">📱 QR Code</button>
+  <button class="tab-btn" onclick="showTab('config')">⚙️ Configuration</button>
+</nav>
+
+<!-- ═══════════════════════════════ FORMULAIRE ═══════════════════════════════ -->
+<div class="page active" id="tab-form">
+
+  <div class="form-card" id="main-form-card">
+    <div class="section-header">
+      <div class="icon">👤</div>
+      <div>
+        <h2>Vos coordonnées</h2>
+        <p>Praticien ou cabinet dentaire</p>
+      </div>
+    </div>
+    <div class="form-body">
+      <div class="row-2">
+        <div class="field-group">
+          <label>Nom / Cabinet <span class="req">*</span></label>
+          <input type="text" id="nom" placeholder="Dr. Martin" required>
+        </div>
+        <div class="field-group">
+          <label>Téléphone <span class="req">*</span></label>
+          <input type="tel" id="telephone" placeholder="06 12 34 56 78" required>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="dr.martin@cabinet.fr" required>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="icon">🦷</div>
+      <div>
+        <h2>Détail de la demande</h2>
+        <p>Matériel et nature de la demande</p>
+      </div>
+    </div>
+    <div class="form-body">
+
+      <div class="field-group">
+        <label>Type de demande <span class="req">*</span></label>
+        <input type="hidden" name="type_demande" id="type_demande" value="">
+        <div class="type-grid">
+          <div class="type-btn" onclick="selectType(this, '🛒 Commande')">
+            <span class="emoji">🛒</span>
+            <span class="label">Commande</span>
+          </div>
+          <div class="type-btn" onclick="selectType(this, '🔧 Problème SAV')">
+            <span class="emoji">🔧</span>
+            <span class="label">Problème / SAV</span>
+          </div>
+          <div class="type-btn" onclick="selectType(this, '💬 Autre demande')">
+            <span class="emoji">💬</span>
+            <span class="label">Autre demande</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Matériel concerné <span class="req">*</span></label>
+        <select id="materiel">
+          <option value="" disabled selected>Sélectionner...</option>
+          <optgroup label="Consommables">
+            <option>Composites & résines</option>
+            <option>Anesthésiants</option>
+            <option>Fils de suture</option>
+            <option>Gants & masques</option>
+            <option>Bavettes & protections</option>
+            <option>Fraises & instruments rotatifs</option>
+          </optgroup>
+          <optgroup label="Équipements">
+            <option>Fauteuil dentaire</option>
+            <option>Unit dentaire</option>
+            <option>Compresseur</option>
+            <option>Stérilisateur / Autoclave</option>
+            <option>Radiologie</option>
+            <option>Turbine & contre-angle</option>
+          </optgroup>
+          <optgroup label="Autre">
+            <option>Implantologie</option>
+            <option>Prothèse</option>
+            <option>Orthodontie</option>
+            <option>Autre matériel</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Urgence</label>
+        <div class="urgence-row">
+          <button type="button" class="urgence-btn" onclick="selectUrgence(this, 'Faible', 'low')">🟢 Pas urgent</button>
+          <button type="button" class="urgence-btn" onclick="selectUrgence(this, 'Modérée', 'mid')">🟡 Modéré</button>
+          <button type="button" class="urgence-btn" onclick="selectUrgence(this, 'Urgente', 'high')">🔴 Urgent</button>
+        </div>
+        <input type="hidden" id="urgence" value="Non précisée">
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field-group">
+        <label>Description de la demande <span class="req">*</span></label>
+        <textarea id="description" placeholder="Décrivez votre demande en détail : références produit, quantités, nature du problème, délai souhaité..." maxlength="800" oninput="updateCount(this)"></textarea>
+        <div class="char-count"><span id="char-count">0</span>/800</div>
+      </div>
+
+      <button class="submit-btn" onclick="submitForm()" id="submit-btn">
+        <span id="btn-text">Envoyer ma demande</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+
+      <div class="error-msg" id="error-msg">
+        ⚠️ Une erreur est survenue. Vérifiez votre configuration EmailJS ou réessayez.
+      </div>
+    </div>
+  </div>
+
+  <div class="success-card" id="success-card">
+    <div class="success-icon">✅</div>
+    <h3>Demande envoyée !</h3>
+    <p>Votre demande a bien été transmise au dépôt dentaire.<br>Vous recevrez un accusé de réception par email et nous vous recontacterons rapidement.</p>
+    <button class="reset-btn" onclick="resetForm()">Nouvelle demande</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════ QR CODE ═══════════════════════════════ -->
+<div class="page" id="tab-qr">
+  <div class="qr-card">
+    <h2>Générer votre QR Code</h2>
+    <p class="sub">Entrez l'URL de votre formulaire hébergé, puis téléchargez le QR code.</p>
+
+    <div class="url-input-group">
+      <input type="url" id="qr-url" placeholder="https://votresite.com/formulaire.html" value="">
+      <button onclick="generateQR()">Générer</button>
+    </div>
+
+    <div id="qr-container"></div>
+
+    <div class="qr-tip">
+      <strong>💡 Comment utiliser ce QR code ?</strong><br>
+      Imprimez-le et collez-le sur vos bons de livraison, cartes de visite, ou affiches en cabinet.<br>
+      Le dentiste scanne → accède au formulaire → vous recevez un email automatiquement.
+    </div>
+
+    <button class="download-btn" id="dl-btn" onclick="downloadQR()" style="display:none">
+      ⬇️ Télécharger le QR code (PNG)
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ CONFIG ═══════════════════════════════ -->
+<div class="page" id="tab-config">
+
+  <div class="config-card">
+    <div class="section-header">
+      <div class="icon">📧</div>
+      <div>
+        <h2>Configuration EmailJS</h2>
+        <p>Pour recevoir les emails automatiques</p>
+      </div>
+    </div>
+    <div class="config-body">
+      <div class="field-group">
+        <label>Public Key</label>
+        <input type="text" id="cfg-public-key" placeholder="ex: user_XXXXXXXXXXX">
+      </div>
+      <div class="field-group">
+        <label>Service ID</label>
+        <input type="text" id="cfg-service-id" placeholder="ex: service_xxxxxxx">
+      </div>
+      <div class="field-group">
+        <label>Template ID (notification dépôt)</label>
+        <input type="text" id="cfg-template-depot" placeholder="ex: template_xxxxxxx">
+      </div>
+      <div class="field-group">
+        <label>Template ID (accusé réception dentiste)</label>
+        <input type="text" id="cfg-template-dentiste" placeholder="ex: template_yyyyyyy">
+      </div>
+      <div class="field-group">
+        <label>Votre email (réception des demandes)</label>
+        <input type="email" id="cfg-email-depot" placeholder="moi@depotdentaire.fr">
+      </div>
+      <button class="save-btn" onclick="saveConfig()">💾 Enregistrer la configuration</button>
+    </div>
+  </div>
+
+  <div class="config-card">
+    <div class="section-header">
+      <div class="icon">🚀</div>
+      <div>
+        <h2>Guide de mise en place</h2>
+        <p>Étapes pour activer l'envoi d'emails</p>
+      </div>
+    </div>
+    <div class="config-body">
+      <ul class="step-list">
+        <li>
+          <div class="step-num">1</div>
+          <span>Créez un compte gratuit sur <strong><a href="https://emailjs.com" target="_blank">emailjs.com</a></strong> (200 emails/mois offerts)</span>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <span>Ajoutez un <strong>Email Service</strong> (Gmail, Outlook…) dans "Email Services"</span>
+        </li>
+        <li>
+          <div class="step-num">3</div>
+          <span>Créez <strong>2 Email Templates</strong> : un pour vous notifier, un pour le dentiste. Utilisez les variables : <code>{{nom}}</code>, <code>{{email}}</code>, <code>{{telephone}}</code>, <code>{{materiel}}</code>, <code>{{type_demande}}</code>, <code>{{description}}</code>, <code>{{urgence}}</code></span>
+        </li>
+        <li>
+          <div class="step-num">4</div>
+          <span>Récupérez votre <strong>Public Key</strong> dans Account → API Keys</span>
+        </li>
+        <li>
+          <div class="step-num">5</div>
+          <span>Hébergez ce fichier HTML sur <strong>GitHub Pages</strong> (gratuit) ou tout autre hébergeur, puis copiez l'URL dans l'onglet QR Code</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <strong>🔧 Variables disponibles pour vos templates EmailJS :</strong><br><br>
+    <code>{{nom}}</code> · <code>{{email}}</code> · <code>{{telephone}}</code> · <code>{{materiel}}</code> · <code>{{type_demande}}</code> · <code>{{urgence}}</code> · <code>{{description}}</code> · <code>{{email_depot}}</code>
+    <br><br>
+    <strong>📱 Notification smartphone :</strong> Activez les notifications email sur votre téléphone, ou ajoutez une règle de filtre "Priorité haute" sur les emails venant du formulaire.
+  </div>
+
+</div>
+
+<script>
+// ─── CONFIG ───
+const CONFIG_KEY = 'depot_dentaire_config';
+let config = {
+  publicKey: '',
+  serviceId: '',
+  templateDepot: '',
+  templateDentiste: '',
+  emailDepot: ''
+};
+
+function loadConfig() {
+  const saved = localStorage.getItem(CONFIG_KEY);
+  if (saved) {
+    config = { ...config, ...JSON.parse(saved) };
+    document.getElementById('cfg-public-key').value = config.publicKey || '';
+    document.getElementById('cfg-service-id').value = config.serviceId || '';
+    document.getElementById('cfg-template-depot').value = config.templateDepot || '';
+    document.getElementById('cfg-template-dentiste').value = config.templateDentiste || '';
+    document.getElementById('cfg-email-depot').value = config.emailDepot || '';
+  }
+}
+
+function saveConfig() {
+  config.publicKey = document.getElementById('cfg-public-key').value.trim();
+  config.serviceId = document.getElementById('cfg-service-id').value.trim();
+  config.templateDepot = document.getElementById('cfg-template-depot').value.trim();
+  config.templateDentiste = document.getElementById('cfg-template-dentiste').value.trim();
+  config.emailDepot = document.getElementById('cfg-email-depot').value.trim();
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+  if (config.publicKey) emailjs.init(config.publicKey);
+  alert('✅ Configuration enregistrée !');
+}
+
+// ─── TABS ───
+function showTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── TYPE & URGENCE ───
+let selectedUrgenceBtn = null;
+function selectType(el, value) {
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('type_demande').value = value;
+}
+function selectUrgence(el, value, cls) {
+  document.querySelectorAll('.urgence-btn').forEach(b => {
+    b.classList.remove('selected-low', 'selected-mid', 'selected-high');
+  });
+  el.classList.add('selected-' + cls);
+  document.getElementById('urgence').value = value;
+}
+
+// ─── CHAR COUNT ───
+function updateCount(el) {
+  document.getElementById('char-count').textContent = el.value.length;
+}
+
+// ─── VALIDATION ───
+function validate() {
+  const nom = document.getElementById('nom').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const tel = document.getElementById('telephone').value.trim();
+  const mat = document.getElementById('materiel').value;
+  const type = document.getElementById('type_demande').value;
+  const desc = document.getElementById('description').value.trim();
+  if (!nom || !email || !tel || !mat || !type || !desc) {
+    alert('Veuillez remplir tous les champs obligatoires (*).');
+    return false;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    alert('Adresse email invalide.');
+    return false;
+  }
+  return true;
+}
+
+// ─── SUBMIT ───
+async function submitForm() {
+  if (!validate()) return;
+
+  const btn = document.getElementById('submit-btn');
+  const spinner = document.getElementById('spinner');
+  const btnText = document.getElementById('btn-text');
+  const errorMsg = document.getElementById('error-msg');
+
+  btn.disabled = true;
+  spinner.classList.add('active');
+  btnText.textContent = 'Envoi en cours...';
+  errorMsg.classList.remove('visible');
+
+  const params = {
+    nom: document.getElementById('nom').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    telephone: document.getElementById('telephone').value.trim(),
+    materiel: document.getElementById('materiel').value,
+    type_demande: document.getElementById('type_demande').value,
+    urgence: document.getElementById('urgence').value,
+    description: document.getElementById('description').value.trim(),
+    email_depot: config.emailDepot
+  };
+
+  try {
+    if (!config.publicKey || !config.serviceId) {
+      throw new Error('Configuration manquante');
+    }
+
+    // Email vers le dépôt
+    await emailjs.send(config.serviceId, config.templateDepot, params);
+
+    // Accusé réception vers le dentiste
+    if (config.templateDentiste) {
+      await emailjs.send(config.serviceId, config.templateDentiste, params);
+    }
+
+    // Succès
+    document.getElementById('main-form-card').style.display = 'none';
+    document.getElementById('success-card').classList.add('visible');
+
+  } catch (err) {
+    console.error(err);
+    errorMsg.classList.add('visible');
+    btn.disabled = false;
+    spinner.classList.remove('active');
+    btnText.textContent = 'Envoyer ma demande';
+  }
+}
+
+function resetForm() {
+  document.getElementById('nom').value = '';
+  document.getElementById('email').value = '';
+  document.getElementById('telephone').value = '';
+  document.getElementById('materiel').value = '';
+  document.getElementById('type_demande').value = '';
+  document.getElementById('description').value = '';
+  document.getElementById('urgence').value = 'Non précisée';
+  document.getElementById('char-count').textContent = '0';
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.urgence-btn').forEach(b => b.classList.remove('selected-low','selected-mid','selected-high'));
+  document.getElementById('main-form-card').style.display = '';
+  document.getElementById('success-card').classList.remove('visible');
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('spinner').classList.remove('active');
+  document.getElementById('btn-text').textContent = 'Envoyer ma demande';
+}
+
+// ─── QR CODE ───
+let qrInstance = null;
+
+function generateQR() {
+  const url = document.getElementById('qr-url').value.trim();
+  if (!url) { alert('Entrez d\'abord une URL.'); return; }
+
+  const container = document.getElementById('qr-container');
+  container.innerHTML = '';
+  qrInstance = new QRCode(container, {
+    text: url,
+    width: 240,
+    height: 240,
+    colorDark: '#0D1B2A',
+    colorLight: '#FDFAF6',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+  document.getElementById('dl-btn').style.display = 'inline-flex';
+}
+
+function downloadQR() {
+  const canvas = document.querySelector('#qr-container canvas');
+  if (!canvas) return;
+  const link = document.createElement('a');
+  link.download = 'qrcode-depot-dentaire.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// ─── INIT ───
+window.addEventListener('DOMContentLoaded', () => {
+  loadConfig();
+  if (config.publicKey) emailjs.init(config.publicKey);
+});
+</script>
+</body>
+</html>
